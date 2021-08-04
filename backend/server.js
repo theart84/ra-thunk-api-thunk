@@ -10,10 +10,10 @@ app.use(koaBody({ json: true }));
 
 let nextId = 1;
 const services = [
-  { id: nextId++, name: 'Замена стекла', price: 21000, content: 'Стекло оригинал от Apple'},
-  { id: nextId++, name: 'Замена дисплея', price: 25000, content: 'Дисплей оригинал от Foxconn'},
-  { id: nextId++, name: 'Замена аккумулятора', price: 4000, content: 'Новый на 4000 mAh'},
-  { id: nextId++, name: 'Замена микрофона', price: 2500, content: 'Оригинальный от Apple'},
+  { id: nextId++, name: 'Замена стекла', price: '21000', content: 'Стекло оригинал от Apple'},
+  { id: nextId++, name: 'Замена дисплея', price: '25000', content: 'Дисплей оригинал от Foxconn'},
+  { id: nextId++, name: 'Замена аккумулятора', price: '4000', content: 'Новый на 4000 mAh'},
+  { id: nextId++, name: 'Замена микрофона', price: '2500', content: 'Оригинальный от Apple'},
 ];
 
 const router = new Router();
@@ -23,7 +23,7 @@ function fortune(ctx, body = null, status = 200) {
     setTimeout(() => {
       if (Math.random() > 0.25) {
         ctx.response.status = status;
-        ctx.response.body = body;
+        ctx.response.body = typeof body === 'function' ? body() : body;
         resolve();
         return;
       }
@@ -71,9 +71,9 @@ router.delete('/api/services/:id', async (ctx, next) => {
     const status = 404;
     return fortune(ctx, null, status);
   }
-  services.splice(index, 1);
+  const sliceData = (index) => services.splice(index, 1)
   const status = 204;
-  return fortune(ctx, null, status);
+  return fortune(ctx,  sliceData.bind(null, index), status);
 });
 
 app.use(router.routes());

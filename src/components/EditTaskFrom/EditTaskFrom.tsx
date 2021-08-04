@@ -4,46 +4,24 @@ import {useDispatch, useSelector} from "react-redux";
 import {useHistory, useParams} from 'react-router-dom';
 
 // Actions
-import {changeValue, clearForm} from '../../bus/form/reducer';
+import {asyncEditFetchData, clearForm, changeValue, asyncEditSavingData} from '../../bus/form/reducer';
+
 
 // Types
 import {RootState} from "../../store";
-import {changeStatusLoader} from "../../bus/loader/reducer";
-import {setError} from "../../bus/error/reducer";
-import {ITask} from "../../bus/tasks/interface";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import {Dispatch} from "@reduxjs/toolkit";
 
 const EditTaskFrom: React.FC = () => {
   const {name, price, content} = useSelector((store: RootState) => store.form);
-  const loader = useSelector((store: RootState) => store.loader.loader);
-  const error = useSelector((store: RootState) => store.error);
-  const dispatch = useDispatch<Dispatch>();
+  const loader = useSelector((store: RootState) => store.form.loader);
+  const error = useSelector((store: RootState) => store.form.error);
+  const dispatch = useDispatch();
   const history = useHistory<History>();
   const params = useParams<{ id: string }>();
 
   useEffect(() => {
-    const fetchData = async () => {
-      dispatch(changeStatusLoader(true))
-      dispatch(setError({message: '', status: false}))
-      try {
-        const response = await fetch(`http://localhost:7070/api/services/${params.id}`);
-        if (!response.ok) {
-          throw new Error('Что-то поломалось!');
-        }
-        const task: ITask = await response.json();
-        Object.entries(task)
-          .forEach(([key, value]) => {
-            dispatch(changeValue({type: key, value: value.toString()}))
-          })
-        dispatch(changeStatusLoader(false));
-      } catch (error) {
-        dispatch(changeStatusLoader(false));
-        dispatch(setError({message: error.message, status: true}))
-      }
-    }
-    fetchData();
+    dispatch(asyncEditFetchData(params.id))
   }, []);
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,32 +46,15 @@ const EditTaskFrom: React.FC = () => {
     const payload = {
       id: params.id,
       name,
-      price: convertPriceFromStrToNum,
+      price,
       content
     }
-    const fetchData = async () => {
-      dispatch(changeStatusLoader(true))
-      dispatch(setError({message: '', status: false}))
-      try {
-        const response = await fetch(`http://localhost:7070/api/services/${params.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) {
-          throw new Error('Что-то поломалось!');
-        }
-        dispatch(changeStatusLoader(false));
-        dispatch(clearForm());
-        history.goBack();
-      } catch (error) {
-        dispatch(changeStatusLoader(false));
-        dispatch(setError({message: error.message, status: true}))
+    //@ts-ignore
+    dispatch(asyncEditSavingData(payload)).then((data) => {
+      if (data.meta.requestStatus === "fulfilled") {
+        history.goBack()
       }
-    }
-    fetchData();
+    });
   }
 
   return (

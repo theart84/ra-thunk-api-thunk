@@ -5,18 +5,15 @@ import {useHistory} from 'react-router-dom';
 
 // Interfaces
 import {ITask} from "../../../bus/tasks/interface";
-import {Dispatch} from "@reduxjs/toolkit";
 
 // Actions
-import {changeStatusLoader} from "../../../bus/loader/reducer";
-import {setError} from "../../../bus/error/reducer";
-import {deleteTask} from "../../../bus/tasks/reducer";
+import {asyncDeleteTask} from "../../../bus/tasks/reducer";
 
 // Styles
 import styles from './TaskListItem.module.css';
 
 const TaskListItem: React.FC<ITask> = ({id, name, price}) => {
-  const dispatch = useDispatch<Dispatch>();
+  const dispatch = useDispatch();
   const history = useHistory<History>();
 
   const onEditHandler = () => {
@@ -24,24 +21,7 @@ const TaskListItem: React.FC<ITask> = ({id, name, price}) => {
   }
 
   const onDeleteHandler = () => {
-    const fetchData = async () => {
-      dispatch(changeStatusLoader(true));
-      dispatch(setError({message: '', status: false}));
-      try {
-        const response = await fetch(`http://localhost:7070/api/services/${id}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) {
-          throw new Error('Что-то поломалось!');
-        }
-        dispatch(deleteTask({id}));
-        dispatch(changeStatusLoader(false));
-      } catch (error) {
-        dispatch(changeStatusLoader(false));
-        dispatch(setError({message: error.message, status: true}));
-      }
-    }
-    fetchData();
+    dispatch(asyncDeleteTask(id));
   }
   return (
     <div className="card mb-3" data-id={id}>
