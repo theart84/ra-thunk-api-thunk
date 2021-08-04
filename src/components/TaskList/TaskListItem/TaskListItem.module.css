@@ -1,0 +1,41 @@
+.text {
+    width: 400px;
+}
+
+.price {
+    margin-right: auto;
+}
+
+.control {
+    display: flex;
+    align-items: center;
+}
+
+.edit {
+    display: block;
+    width: 25px;
+    height: 25px;
+    background-image: url("/src/assets/pencil.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: all 0.5s
+}
+
+.edit:hover,
+.delete:hover {
+    transform: scale(1.3);
+    transition: all 0.5s
+}
+
+.delete {
+    display: block;
+    width: 25px;
+    height: 25px;
+    background-image: url("/src/assets/trash.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    cursor: pointer;
+    transition: all 0.5s
+}
